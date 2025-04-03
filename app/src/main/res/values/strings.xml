@@ -1,6 +1,6 @@
 
 <resources>
-    <string name="app_name">CampusExpense Manager SE06304</string>
+    <string name="app_name">Financial Management</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
@@ -48,19 +48,18 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string-array name="filter_options">
-        <item>All</item>
-        <item>Today</item>
-        <item>This Week</item>
-        <item>This Month</item>
-    </string-array>
+
 
     <string-array name="expense_categories">
-        <item>Ăn uống</item>
-        <item>Di chuyển</item>
-        <item>Mua sắm</item>
-        <item>Giải trí</item>
+        <item>Thực phẩm</item>
+        <item>Du Lịch</item>
+        <item>Quần Áo</item>
+        <item>Giao thông</item>
+        <item>Học tập</item>
+        <item>Vui chơi</item>
+        <item>Y tế</item>
         <item>Khác</item>
     </string-array>
+
 
 </resources>

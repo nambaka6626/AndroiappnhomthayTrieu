@@ -26,9 +26,9 @@ import java.util.List;
 public class ExpensesFragment extends Fragment {
     private RecyclerView rvExpenses;
     private FloatingActionButton btnAddExpense;
-    private EditText etSearchDate; // Thêm EditText để tìm kiếm ngày
+    private EditText etSearchDate;
     private List<Expense> expenseList;
-    private List<Expense> filteredList; // Danh sách đã lọc
+    private List<Expense> filteredList;
     private ExpensesAdapter expensesAdapter;
 
     public ExpensesFragment() {}
@@ -39,21 +39,20 @@ public class ExpensesFragment extends Fragment {
 
         rvExpenses = view.findViewById(R.id.rvExpenses);
         btnAddExpense = view.findViewById(R.id.btnAddExpense);
-        etSearchDate = view.findViewById(R.id.etSearchDate); // Liên kết EditText
+        etSearchDate = view.findViewById(R.id.etSearchDate);
         rvExpenses.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         expenseList = new ArrayList<>();
         filteredList = new ArrayList<>();
         loadSampleExpenses();
-        filteredList.addAll(expenseList); // Ban đầu hiển thị toàn bộ danh sách
-        sortByDateDescending(); // Sắp xếp ban đầu theo ngày giảm dần
+        filteredList.addAll(expenseList);
+        sortByDateDescending();
 
         expensesAdapter = new ExpensesAdapter(filteredList);
         rvExpenses.setAdapter(expensesAdapter);
 
         btnAddExpense.setOnClickListener(v -> showAddExpenseDialog());
 
-        // Xử lý tìm kiếm theo ngày
         etSearchDate.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -90,28 +89,26 @@ public class ExpensesFragment extends Fragment {
         expenseList.add(new Expense("Xem phim cùng bạn bè", "Giải trí", 80000, "2025-03-27"));
     }
 
-    // Hàm lọc danh sách theo ngày
     private void filterExpensesByDate(String date) {
         filteredList.clear();
         if (date.isEmpty()) {
-            filteredList.addAll(expenseList); // Nếu không nhập ngày, hiển thị tất cả
+            filteredList.addAll(expenseList);
         } else {
             for (Expense expense : expenseList) {
                 if (expense.getDate().equals(date)) {
-                    filteredList.add(expense); // Chỉ thêm các khoản chi tiêu khớp với ngày
+                    filteredList.add(expense);
                 }
             }
         }
-        sortByDateDescending(); // Sắp xếp sau khi lọc
-        expensesAdapter.notifyDataSetChanged(); // Cập nhật RecyclerView
+        sortByDateDescending();
+        expensesAdapter.notifyDataSetChanged();
     }
 
-    // Hàm sắp xếp theo ngày giảm dần (ngày gần nhất lên đầu)
     private void sortByDateDescending() {
         Collections.sort(filteredList, new Comparator<Expense>() {
             @Override
             public int compare(Expense e1, Expense e2) {
-                return e2.getDate().compareTo(e1.getDate()); // Sắp xếp giảm dần
+                return e2.getDate().compareTo(e1.getDate());
             }
         });
     }
@@ -127,9 +124,9 @@ public class ExpensesFragment extends Fragment {
         Spinner spCategory = dialogView.findViewById(R.id.spCategory);
         Button btnSave = dialogView.findViewById(R.id.btnSave);
 
-        // Tái sử dụng danh mục từ filter_options đã định nghĩa trong layout chính
+        // Sử dụng expense_categories thay vì filter_options
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.filter_options, android.R.layout.simple_spinner_item);
+                R.array.expense_categories, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCategory.setAdapter(adapter);
 
@@ -166,7 +163,7 @@ public class ExpensesFragment extends Fragment {
 
                 Expense newExpense = new Expense(description, category, amount, date);
                 expenseList.add(newExpense);
-                filterExpensesByDate(etSearchDate.getText().toString()); // Cập nhật danh sách lọc sau khi thêm
+                filterExpensesByDate(etSearchDate.getText().toString());
                 Toast.makeText(getActivity(), "Đã thêm khoản chi tiêu", Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
 
@@ -193,16 +190,24 @@ public class ExpensesFragment extends Fragment {
         etAmount.setText(String.valueOf(expense.getAmount()));
         etDate.setText(expense.getDate());
 
+        // Sử dụng expense_categories thay vì filter_options
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.filter_options, android.R.layout.simple_spinner_item);
+                R.array.expense_categories, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spCategory.setAdapter(adapter);
+
+        // Đặt lại category hiện tại của expense
+        int categoryPosition = adapter.getPosition(expense.getCategory());
+        if (categoryPosition >= 0) {
+            spCategory.setSelection(categoryPosition);
+        }
 
         AlertDialog dialog = builder.create();
         btnSave.setOnClickListener(v -> {
             String newDescription = etDescription.getText().toString();
             double newAmount = Double.parseDouble(etAmount.getText().toString());
             String newDate = etDate.getText().toString();
+            String newCategory = spCategory.getSelectedItem().toString();
 
             if (newDescription.isEmpty() || newDate.isEmpty()) {
                 Toast.makeText(getActivity(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
@@ -212,7 +217,8 @@ public class ExpensesFragment extends Fragment {
             expense.setDescription(newDescription);
             expense.setAmount(newAmount);
             expense.setDate(newDate);
-            filterExpensesByDate(etSearchDate.getText().toString()); // Cập nhật danh sách lọc sau khi chỉnh sửa
+            expense.setCategory(newCategory); // Cập nhật category mới
+            filterExpensesByDate(etSearchDate.getText().toString());
             dialog.dismiss();
         });
 
@@ -225,7 +231,7 @@ public class ExpensesFragment extends Fragment {
                 .setMessage("Bạn có chắc chắn muốn xóa khoản chi tiêu: " + expenseToDelete.getDescription() + "?")
                 .setPositiveButton("Xóa", (dialog, which) -> {
                     expenseList.remove(expenseToDelete);
-                    filterExpensesByDate(etSearchDate.getText().toString()); // Cập nhật danh sách lọc sau khi xóa
+                    filterExpensesByDate(etSearchDate.getText().toString());
                     Toast.makeText(getActivity(), "Đã xóa khoản chi tiêu", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Hủy", null)
