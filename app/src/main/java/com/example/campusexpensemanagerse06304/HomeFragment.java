@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.campusexpensemanagerse06304.database.BudgetDb;
 import com.example.campusexpensemanagerse06304.model.Expense;
@@ -49,6 +50,13 @@ public class HomeFragment extends Fragment {
 
         loadMonthlyExpensesChart();
         loadCategoryExpensesChart();
+
+        // Thêm xử lý nút cập nhật biểu đồ
+        Button btnRefresh = view.findViewById(R.id.btn_refresh_charts);
+        btnRefresh.setOnClickListener(v -> {
+            loadMonthlyExpensesChart();
+            loadCategoryExpensesChart();
+        });
     }
 
     private void loadMonthlyExpensesChart() {
@@ -84,7 +92,7 @@ public class HomeFragment extends Fragment {
 
     private void setupBarChart(HorizontalBarChart chart, Map<String, Double> dataMap) {
         List<Map.Entry<String, Double>> sortedEntries = new ArrayList<>(dataMap.entrySet());
-        sortedEntries.sort(Map.Entry.comparingByValue()); // tăng dần
+        sortedEntries.sort(Map.Entry.comparingByValue()); // Tăng dần
 
         List<BarEntry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
@@ -96,7 +104,7 @@ public class HomeFragment extends Fragment {
         }
 
         BarDataSet dataSet = new BarDataSet(entries, "Chi tiêu");
-        dataSet.setColor(Color.parseColor("#3F51B5")); // màu xanh
+        dataSet.setColor(Color.parseColor("#3F51B5")); // Màu xanh
 
         BarData barData = new BarData(dataSet);
         barData.setBarWidth(0.7f);

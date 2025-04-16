@@ -82,32 +82,34 @@
 
             builder.setView(view);
             builder.setPositiveButton("Thêm", (dialog, which) -> {
-                String category = edtCategory.getText().toString();
-                String amountStr = edtAmount.getText().toString();
-                String spentStr = edtSpent.getText().toString();
+                String category = edtCategory.getText().toString().trim();
+                String amountStr = edtAmount.getText().toString().trim();
+                String spentStr = edtSpent.getText().toString().trim();
 
                 if (!category.isEmpty() && !amountStr.isEmpty()) {
                     try {
                         double amount = Double.parseDouble(amountStr);
                         double spent = spentStr.isEmpty() ? 0 : Double.parseDouble(spentStr);
 
-                        // Kiểm tra chi tiêu không vượt quá ngân sách
                         if (spent > amount) {
                             Toast.makeText(getContext(), "Số tiền đã chi không thể lớn hơn ngân sách", Toast.LENGTH_SHORT).show();
                             return;
                         }
 
-                        // Nếu chi tiêu hợp lệ, thêm ngân sách mới vào DB
                         long result = budgetDb.insertBudget(category, amount, spent);
-                        if (result != -1) {
+
+                        if (result == -1) {
+                            Toast.makeText(getContext(), "Số tiền phải lớn hơn 0", Toast.LENGTH_SHORT).show();
+                        } else if (result == -2) {
+                            Toast.makeText(getContext(), "Danh mục ngân sách đã tồn tại", Toast.LENGTH_SHORT).show();
+                        } else {
                             budgetList.clear();
                             budgetList.addAll(budgetDb.getAllBudgets());
                             budgetAdapter.notifyDataSetChanged();
                             updateUI();
                             Toast.makeText(getContext(), "Thêm thành công", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getContext(), "Thêm thất bại", Toast.LENGTH_SHORT).show();
                         }
+
                     } catch (NumberFormatException e) {
                         Toast.makeText(getContext(), "Số tiền không hợp lệ", Toast.LENGTH_SHORT).show();
                     }
@@ -119,6 +121,7 @@
             builder.setNegativeButton("Hủy", null);
             builder.show();
         }
+
 
         private void updateUI() {
             updatePieChart();

@@ -32,24 +32,34 @@ public class BudgetDb {
     }
 
     public long insertBudget(String category, double amount, double spent) {
-        // Kiểm tra số tiền nếu bằng 0 thì không cho phép tạo ngân sách
         if (amount <= 0) {
             Log.e("BUDGET_DB", "Số tiền ngân sách phải lớn hơn 0.");
-            return -1; // Không cho phép tạo ngân sách với số tiền bằng 0
+            return -1;
         }
 
-        // Đảm bảo số tiền đã chi (spent) mặc định là 0 nếu không có chi tiêu
-        spent = 0;  // Giá trị mặc định của spent khi tạo ngân sách là 0
+        // Kiểm tra xem ngân sách với category này đã tồn tại chưa
+        Cursor checkCursor = dbRead.rawQuery(
+                "SELECT 1 FROM " + DatabaseContext.TABLE_BUDGETS +
+                        " WHERE " + DatabaseContext.CATEGORY_COL + " = ?", new String[]{category});
 
-        // Tạo ContentValues để chèn ngân sách vào cơ sở dữ liệu
+        if (checkCursor.moveToFirst()) {
+            // Ngân sách đã tồn tại
+            Log.e("BUDGET_DB", "Đã có ngân sách này.");
+            checkCursor.close();
+            return -2; // Trả về -2 để báo lỗi trùng
+        }
+        checkCursor.close();
+
+        spent = 0;
+
         ContentValues values = new ContentValues();
         values.put(DatabaseContext.CATEGORY_COL, category);
         values.put(DatabaseContext.AMOUNT_COL, amount);
-        values.put(DatabaseContext.SPENT_COL, spent);  // Đảm bảo spent là 0
+        values.put(DatabaseContext.SPENT_COL, spent);
 
-        // Chèn ngân sách vào bảng ngân sách và trả về ID của ngân sách đã tạo
         return dbWrite.insert(DatabaseContext.TABLE_BUDGETS, null, values);
     }
+
 
 
     public List<Budget> getAllBudgets() {

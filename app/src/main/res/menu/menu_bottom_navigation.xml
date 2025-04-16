@@ -14,7 +14,7 @@
         android:id="@+id/menu_budget"/>
     <item
         android:title="Overview"
-
+        android:icon="@drawable/overview_24dp"
         android:id="@+id/menu_overview"/>
     <item
         android:title="Settings"
